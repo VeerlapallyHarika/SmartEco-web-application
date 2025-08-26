@@ -1,8 +1,8 @@
-♻️ Recyclica – Smart Waste Management Web App
+♻️ SmartEco – Smart Waste Management Web App
 AI-powered waste segregation and recycling made simple
 
 ✅ Overview
-Recyclica is an AI-driven web application that helps users classify waste, locate recycling centers, and track eco-friendly actions. It uses machine learning and computer vision to identify waste types like organic, recyclable, and hazardous, making sustainable living easier and smarter.
+SmartEco is an AI-driven web application that helps users classify waste, locate recycling centers, and track eco-friendly actions. It uses machine learning and computer vision to identify waste types like organic, recyclable, and hazardous, making sustainable living easier and smarter.
 
 🌍 Features
 ✔ AI Waste Classification – Upload an image and get instant classification.
