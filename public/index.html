@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Smart Waste Segregation & Recycling</title>
+<style>
+  :root {
+    --bg: #0b1220; --card: #101a2e; --muted: #5b6b8c; --text: #e7ecf6; --accent: #5eead4; --accent2:#60a5fa; --warn:#f59e0b; --danger:#f87171; --ok:#34d399;
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, "Helvetica Neue", Arial; background: linear-gradient(120deg,#0b1220,#0f1b33 60%); color: var(--text); }
+  header { padding: 20px clamp(16px,4vw,48px); display:flex; align-items:center; justify-content:space-between; position: sticky; top:0; backdrop-filter: blur(6px); background: rgba(11,18,32,0.65); border-bottom: 1px solid rgba(255,255,255,0.06); z-index:10; }
+  .brand { display:flex; gap:12px; align-items:center; font-weight:700; letter-spacing:.3px; }
+  .logo { width:36px; height:36px; border-radius:12px; display:grid; place-items:center; background: radial-gradient(circle at 30% 30%, var(--accent2), transparent 60%), radial-gradient(circle at 70% 70%, var(--accent), transparent 60%); box-shadow: 0 0 30px rgba(96,165,250,.35); }
+  .pill { border:1px solid rgba(255,255,255,.12); border-radius:999px; padding:6px 12px; color:var(--muted); }
+  main { padding: 24px clamp(16px,4vw,48px) 64px; display:grid; gap:24px; }
+  .grid { display:grid; gap:18px; grid-template-columns: repeat(12,1fr); }
+  .card { grid-column: span 12; background: var(--card); border:1px solid rgba(255,255,255,.08); border-radius: 18px; padding: 18px; box-shadow: 0 12px 30px rgba(0,0,0,.25); }
+  @media(min-width: 980px){
+    .span-4{grid-column: span 4;} .span-6{grid-column: span 6;} .span-8{grid-column: span 8;}
+  }
+  h2{ margin: 6px 0 12px; font-size: clamp(18px,2.2vw,22px); }
+  h3{ margin: 8px 0; font-size: 16px; color: var(--muted); }
+  .row{ display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+  .btn{ padding:10px 14px; border-radius:12px; border:1px solid rgba(255,255,255,.12); background:linear-gradient(180deg,#172542,#0e1a31); color:var(--text); cursor:pointer; transition:.2s; }
+  .btn:hover{ transform: translateY(-1px); box-shadow:0 8px 20px rgba(0,0,0,.25); }
+  .btn.acc{ border-color:transparent; background: linear-gradient(90deg,var(--accent2),var(--accent)); color:#071120; font-weight:700; }
+  input, select { background: #0d1730; color: var(--text); border:1px solid rgba(255,255,255,.12); border-radius: 12px; padding: 10px 12px; }
+  .muted { color: var(--muted); }
+  .badge{ padding:6px 10px; border-radius:999px; border:1px solid rgba(255,255,255,.14); background:#0f1b33; font-size:12px; }
+  .tag{ padding:6px 8px; border-radius:8px; background:rgba(94,234,212,.12); border:1px solid rgba(94,234,212,.25); color:#9cf1e6; font-size:12px; }
+  .list{ display:grid; gap:10px; }
+  .list .item{ padding:12px; border:1px solid rgba(255,255,255,.08); background:#0f1a31; border-radius:14px; display:flex; gap:12px; align-items:center; justify-content:space-between; }
+  .kpi { display:flex; gap:18px; flex-wrap:wrap; }
+  .kpi .box{ min-width:160px; padding:12px; border-radius:16px; background:#0f1a31; border:1px solid rgba(255,255,255,.08); }
+  .kpi .num{ font-size:22px; font-weight:800; }
+  .footer { color:var(--muted); text-align:center; padding:18px; }
+</style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <div class="logo">♻️</div>
+      <div>Smart Waste</div>
+      <span class="pill" id="userPill">Guest</span>
+    </div>
+    <div class="row">
+      <span class="badge">Streak: <b id="streak">0</b> 🔥</span>
+      <span class="badge">Points: <b id="points">0</b> ⭐</span>
+      <button class="btn" id="refreshBtn">Refresh</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="grid">
+      <!-- Scan / Classify -->
+      <div class="card span-8">
+        <h2>Scan & Classify Waste</h2>
+        <h3>Use camera or describe the item</h3>
+        <div class="row" style="gap:10px;">
+          <input type="text" id="itemName" placeholder="e.g., 500ml PET bottle" style="min-width:240px;" />
+          <input type="file" id="imageInput" accept="image/*" />
+          <button class="btn acc" id="classifyBtn">Classify</button>
+        </div>
+        <div id="classifyResult" class="list" style="margin-top:12px;"></div>
+      </div>
+
+      <!-- Rewards -->
+      <div class="card span-4">
+        <h2>Rewards</h2>
+        <div id="rewardsList" class="list" style="margin-top:12px;"></div>
+      </div>
+
+      <!-- Gamification -->
+      <div class="card span-6">
+        <h2>Gamification & Rewards</h2>
+        <div class="row">
+          <input id="username" placeholder="Enter your name" style="min-width:200px;">
+          <button class="btn" id="saveUser">Use this profile</button>
+        </div>
+        <p class="muted" style="margin-top:8px;">Earn points for every correctly handled item. Unlock badges and climb the leaderboard!</p>
+        <div id="badges" class="row" style="margin-top:8px;"></div>
+        <div class="row" style="margin-top:12px; gap:8px; flex-wrap:wrap;">
+          <span class="tag">Recyclable: +5</span>
+          <span class="tag">Biodegradable: +3</span>
+          <span class="tag">Hazardous: +10</span>
+          <span class="tag">Unknown: +1</span>
+        </div>
+      </div>
+
+      <!-- Leaderboard -->
+      <div class="card span-6">
+        <h2>Community Leaderboard (Demo)</h2>
+        <div id="leaderboard" class="list"></div>
+      </div>
+
+      <!-- Analytics -->
+      <div class="card span-12">
+        <h2>Analytics & Impact</h2>
+        <div class="kpi">
+          <div class="box"><div class="muted">Plastic Reduced</div><div class="num" id="kpiPlastic">0 kg</div></div>
+          <div class="box"><div class="muted">CO₂ Saved</div><div class="num" id="kpiCO2">0 kg</div></div>
+          <div class="box"><div class="muted">Trees Saved</div><div class="num" id="kpiTrees">0</div></div>
+        </div>
+        <div style="margin-top:12px;">
+          <h3>Recent Activity</h3>
+          <div id="history" class="list"></div>
+        </div>
+      </div>
+    </section>
+    <div class="footer">Built with ❤️ for sustainability • Demo only</div>
+  </main>
+
+<script>
+  // ====== Helpers ======
+  const $ = (sel) => document.querySelector(sel);
+  const el = (tag, props={}, ...children) => {
+    const n = document.createElement(tag);
+    Object.assign(n, props);
+    for (const c of children) n.append(c);
+    return n;
+  };
+
+  // ====== State ======
+  let currentUser = { name: "Guest", points: 0 };
+
+  // ====== Demo Rewards ======
+  const REWARDS = [
+    { id: 1, name: "Reusable Water Bottle", cost: 100 },
+    { id: 2, name: "Discount Coupon", cost: 200 },
+    { id: 3, name: "Eco Tote Bag", cost: 300 },
+    { id: 4, name: "Tree Plantation Sponsorship", cost: 500 }
+  ];
+
+  function renderRewards() {
+    const box = $("#rewardsList");
+    box.innerHTML = "";
+    REWARDS.forEach(r => {
+      const affordable = currentUser.points >= r.cost;
+      box.append(
+        el("div", { className: "item" },
+          el("div", { innerHTML: `<b>${r.name}</b> • ${r.cost} ⭐` }),
+          el("button", {
+            className: "btn" + (affordable ? " acc" : ""),
+            disabled: !affordable,
+            onclick: () => {
+              if (!affordable) return alert("Not enough points!");
+              alert(`🎉 You redeemed: ${r.name}`);
+              currentUser.points -= r.cost;
+              $("#points").textContent = currentUser.points;
+              renderRewards();
+            }
+          }, affordable ? "Redeem" : "Locked")
+        )
+      );
+    });
+  }
+
+  // ====== API Calls (unchanged) ======
+  async function initUser(name = "Guest") {
+    const res = await fetch(`/api/user/init`, {
+      method:"POST", headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify({ name })
+    });
+    const data = await res.json();
+    currentUser = data.user;
+    $("#userPill").textContent = currentUser.name;
+    $("#points").textContent = currentUser.points;
+    $("#streak").textContent = currentUser.streak;
+    renderBadges(currentUser.badges);
+    renderRewards();
+  }
+
+  async function classifyItem() {
+    const fd = new FormData();
+    const description = $("#itemName").value.trim();
+    const file = $("#imageInput").files[0];
+    if (description) fd.append("description", description);
+    if (file) fd.append("image", file);
+    const res = await fetch(`/api/classify`, { method:"POST", body: fd });
+    return await res.json();
+  }
+
+  async function logItem(itemName, category) {
+    const res = await fetch(`/api/logItem`, {
+      method:"POST", headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify({ name: currentUser.name, itemName, category })
+    });
+    return await res.json();
+  }
+
+  async function getUser() {
+    const res = await fetch(`/api/user?name=${encodeURIComponent(currentUser.name)}`);
+    return await res.json();
+  }
+
+  async function getLeaderboard() {
+    const res = await fetch(`/api/leaderboard`);
+    return await res.json();
+  }
+
+  async function getStats() {
+    const res = await fetch(`/api/stats?name=${encodeURIComponent(currentUser.name)}`);
+    return await res.json();
+  }
+
+  // ====== Renderers (existing) ======
+  function renderBadges(badges=[]) {
+    const box = $("#badges");
+    box.innerHTML = "";
+    if (!badges.length) { box.append(el("span",{className:"muted",textContent:"No badges yet — start recycling!"})); return; }
+    badges.forEach(b => box.append(el("span",{className:"badge",textContent:b})));
+  }
+
+  function renderLeaderboard(rows=[]) {
+    const box = $("#leaderboard");
+    box.innerHTML = "";
+    if (!rows.length) { box.append(el("div",{className:"muted",textContent:"No entries yet."})); return; }
+    rows.forEach((r,i) => {
+      box.append(
+        el("div",{className:"item"},
+          el("div", {innerHTML:`#${i+1} <b>${r.name}</b>`}),
+          el("div", {innerHTML:`${r.points} ⭐`})
+        )
+      );
+    });
+  }
+
+  function renderAnalytics(data) {
+    const k = data.impact || { plasticReducedKg:0, co2SavedKg:0, treesSaved:0 };
+    $("#kpiPlastic").textContent = `${k.plasticReducedKg.toFixed(2)} kg`;
+    $("#kpiCO2").textContent = `${k.co2SavedKg.toFixed(2)} kg`;
+    $("#kpiTrees").textContent = `${k.treesSaved.toFixed(1)}`;
+
+    const histBox = $("#history");
+    histBox.innerHTML = "";
+    (data.history || []).slice().reverse().forEach(h => {
+      const d = new Date(h.ts);
+      histBox.append(
+        el("div",{className:"item"},
+          el("div", {innerHTML:`<b>${h.itemName}</b> <span class="tag">${h.category}</span>`}),
+          el("div",{className:"muted", textContent:`${d.toLocaleString()} • +${h.points}⭐`})
+        )
+      );
+    });
+  }
+
+  // ====== Events ======
+  $("#classifyBtn").addEventListener("click", async () => {
+    const name = $("#itemName").value.trim() || "Item";
+    try {
+      const out = await classifyItem();
+      const box = $("#classifyResult");
+      box.innerHTML = "";
+      const row = el("div", {className:"item"},
+        el("div", {}, 
+          el("div", {innerHTML:`<b>${name}</b> → ${out.category}`}),
+          el("div", {className:"muted", textContent: out.guidance })
+        ),
+        el("div", {},
+          el("button", {className:"btn", onclick: async () => {
+            const log = await logItem(name, out.category);
+            await refreshAll();
+            const earned = log.earned?.points ?? 0;
+            alert(`Logged! +${earned} points`);
+          }}, "Log & Earn")
+        )
+      );
+      box.append(row);
+    } catch (e) {
+      alert("Failed to classify.");
+    }
+  });
+
+  $("#saveUser").addEventListener("click", async () => {
+    const name = $("#username").value.trim() || "Guest";
+    await initUser(name);
+    await refreshAll();
+  });
+
+  $("#refreshBtn").addEventListener("click", async ()=> {
+    await refreshAll();
+  });
+
+  async function refreshAll() {
+    const u = await getUser();
+    currentUser = u.user;
+    $("#userPill").textContent = currentUser.name;
+    $("#points").textContent = currentUser.points;
+    $("#streak").textContent = currentUser.streak;
+    renderBadges(currentUser.badges);
+
+    const lb = await getLeaderboard();
+    renderLeaderboard(lb.top);
+
+    const st = await getStats();
+    renderAnalytics(st);
+
+    renderRewards(); // ✅ update rewards
+  }
+
+  // ====== Boot ======
+  (async function boot(){
+    await initUser("Guest");
+    await refreshAll();
+  })();
+</script>
+</body>
+</html>
