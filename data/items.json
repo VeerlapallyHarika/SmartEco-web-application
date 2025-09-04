@@ -1,0 +1,5 @@
+{
+  "plastic_bottle": { "category": "Plastic", "disposal": "Recycle bin" },
+  "banana_peel": { "category": "Organic", "disposal": "Compost" },
+  "paper": { "category": "Paper", "disposal": "Recycle bin" }
+}

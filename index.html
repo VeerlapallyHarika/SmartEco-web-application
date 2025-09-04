@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SMART ECO</title>
+
+  <!-- ✅ Link your CSS -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Splash Screen -->
+  <div id="splash-screen" role="dialog" aria-label="Loading screen">
+    <img 
+      src="https://cdn.pixabay.com/photo/2020/08/05/13/11/eco-5465429_1280.png" 
+      alt="Smart Eco App Logo" 
+      class="splash-logo" 
+    />
+    <h2>Loading Smart Eco...</h2>
+  </div>
+  <!-- Main App -->
+  <div id="app" hidden>
+    <!-- Header -->
+    <header>
+      <h1>SMART ECO</h1>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+      <!-- Scanner Section -->
+      <section id="scanner" aria-label="QR Scanner">
+        <video id="camera" width="300" autoplay playsinline></video>
+        <div class="actions">
+          <button id="start-scan" aria-label="Start scanning item">Start Scan</button>
+          <button id="stop-scan" aria-label="Stop scanning item" hidden>Stop Scan</button>
+        </div>
+      </section>
+
+      <!-- Result Section -->
+      <section id="result" aria-live="polite">
+        <h2>Scan Result</h2>
+        <p><strong>Item:</strong> <span id="item-name">-</span></p>
+        <p><strong>Category:</strong> <span id="item-category">-</span></p>
+        <p><strong>Disposal:</strong> <span id="item-disposal">-</span></p>
+      </section>
+
+      <!-- Points Section -->
+      <section id="points" aria-label="User points and progress">
+        <h2>Eco Points</h2>
+        <p><strong>Total:</strong> <span id="points-count">0</span></p>
+        <progress id="progress-bar" value="0" max="100" aria-valuemin="0" aria-valuemax="100"></progress>
+      </section>
+
+      <!-- History Section -->
+      <section id="history" aria-label="Scan history">
+        <h2>Scan History</h2>
+        <ul id="history-list"></ul>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+      <p>© 2025 Smart Eco — Make Waste Smarter 🌱</p>
+    </footer>
+  </div>
+
+  <!-- Scripts -->
+  <script src="libs/jsQR.js"></script>
+  <script src="app.js"></script>
+  <script src="splash.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
